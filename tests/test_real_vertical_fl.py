@@ -1,5 +1,6 @@
+import os
 import sys
-sys.path.insert(0, '/home/yuank/peafowl-2')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 from sklearn.model_selection import train_test_split

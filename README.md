@@ -70,9 +70,24 @@ peafowl-2/
 #### 安装依赖
 
 ```bash
-cd /home/yuank/peafowl-2
+cd peafowl-python
 pip install -r requirements.txt
 ```
+
+#### 使用一键启动脚本（推荐）
+
+项目提供了 `start.sh` 脚本，自动完成环境初始化、依赖安装、测试运行和 WebApp 启动：
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+脚本功能：
+1. 检测并创建 `.venv` 虚拟环境
+2. 使用清华源安装 `requirements.txt` 中的依赖
+3. 运行所有单元测试
+4. 测试通过后自动启动 WebApp 服务
 
 #### 运行测试
 
@@ -94,7 +109,7 @@ PEAFOWL 提供了一个交互式 Web 应用，用于可视化展示协议流程�
 ##### 启动服务
 
 ```bash
-cd /home/yuank/peafowl-2/webapp
+cd peafowl-python/webapp
 python app.py
 ```
 
@@ -282,9 +297,24 @@ peafowl-2/
 #### Installation
 
 ```bash
-cd /home/yuank/peafowl-2
+cd peafowl-python
 pip install -r requirements.txt
 ```
+
+#### Using One-Click Start Script (Recommended)
+
+The project provides `start.sh` script to automatically complete environment initialization, dependency installation, test running, and WebApp startup:
+
+```bash
+chmod +x start.sh
+./start.sh
+```
+
+Script features:
+1. Detects and creates `.venv` virtual environment
+2. Installs dependencies from `requirements.txt` using Tsinghua mirror
+3. Runs all unit tests
+4. Automatically starts WebApp service after tests pass
 
 #### Running Tests
 
@@ -306,7 +336,7 @@ PEAFOWL provides an interactive web application for visualizing protocol workflo
 ##### Starting the Service
 
 ```bash
-cd /home/yuank/peafowl-2/webapp
+cd peafowl-python/webapp
 python app.py
 ```
 

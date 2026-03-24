@@ -105,7 +105,7 @@ def train_and_evaluate(X_train, X_test, y_train, y_test):
     return accuracy, f1
 
 
-def test_different_parties(X, y, party_numbers, test_size=0.2, random_state=42):
+def run_different_parties_test(X, y, party_numbers, test_size=0.2, random_state=42):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     
     results = {
@@ -154,7 +154,7 @@ def run_wine_experiment():
     party_numbers = [2, 3, 4, 5, 6]
     
     print("\n--- Testing different party numbers ---")
-    results = test_different_parties(X, y, party_numbers)
+    results = run_different_parties_test(X, y, party_numbers)
     
     return {
         'dataset': 'wine',
@@ -176,7 +176,7 @@ def run_breast_cancer_experiment():
     party_numbers = [2, 3, 4, 5, 6]
     
     print("\n--- Testing different party numbers ---")
-    results = test_different_parties(X, y, party_numbers)
+    results = run_different_parties_test(X, y, party_numbers)
     
     return {
         'dataset': 'breast_cancer',
@@ -198,7 +198,7 @@ def run_mnist_experiment():
     party_numbers = [2, 3, 4, 5, 7, 8]
     
     print("\n--- Testing different party numbers ---")
-    results = test_different_parties(X, y, party_numbers)
+    results = run_different_parties_test(X, y, party_numbers)
     
     return {
         'dataset': 'mnist',

@@ -1,0 +1,22 @@
+# System parameters
+security_parameter: 128         # Security level λ (bits)
+num_parties: 3                  # N
+threshold: 1                    # t (maximum corrupted parties)
+num_samples: 1024               # n
+num_features: 1024              # m
+intersection_ratio: 0.5         # β (for testing)
+
+# PRF parameters
+prf_key_bytes: 16              # AES-128 key length
+
+# SHPRG parameters (based on LWR)
+shprg_d: 8                      # Seed vector dimension
+shprg_m: 1024                   # Output vector dimension (usually equal to features m)
+shprg_q: 340282366920938463463374607431768211456  # 2^128
+shprg_p: 18446744073709551616   # 2^64
+
+# Secret sharing modulus (using 64-bit modulus for easy computation)
+secret_modulus: 18446744073709551616  # 2^64
+
+# Precision (for float to int conversion)
+precision_bits: 16              # L

@@ -120,6 +120,64 @@ def train_and_evaluate(X_train, X_test, y_train, y_test, model_type='logistic'):
     return accuracy, f1, model
 
 
+def build_cnn_model(input_shape, num_classes):
+    try:
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+        from tensorflow.keras.utils import to_categorical
+
+        model = Sequential([
+            Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+            MaxPooling2D((2, 2)),
+            Conv2D(64, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Flatten(),
+            Dense(128, activation='relu'),
+            Dropout(0.5),
+            Dense(num_classes, activation='softmax')
+        ])
+
+        model.compile(
+            optimizer='adam',
+            loss='categorical_crossentropy',
+            metrics=['accuracy']
+        )
+
+        return model
+    except ImportError:
+        return None
+
+
+def train_and_evaluate_cnn(X_train, X_test, y_train, y_test):
+    try:
+        from tensorflow.keras.utils import to_categorical
+
+        num_classes = len(np.unique(y_train))
+        
+        X_train_cnn = X_train.reshape(-1, 28, 28, 1)
+        X_test_cnn = X_test.reshape(-1, 28, 28, 1)
+        
+        y_train_cat = to_categorical(y_train, num_classes)
+        y_test_cat = to_categorical(y_test, num_classes)
+        
+        model = build_cnn_model((28, 28, 1), num_classes)
+        
+        if model is None:
+            return None, None, None
+        
+        model.fit(X_train_cnn, y_train_cat, epochs=5, batch_size=32, verbose=0)
+        
+        test_loss, test_acc = model.evaluate(X_test_cnn, y_test_cat, verbose=0)
+        
+        y_pred = np.argmax(model.predict(X_test_cnn), axis=1)
+        f1 = f1_score(y_test, y_pred, average='weighted')
+        
+        return test_acc, f1, model
+    except Exception as e:
+        print(f"CNN training failed: {e}")
+        return None, None, None
+
+
 def run_wine_experiment():
     print("=" * 60)
     print("Wine Dataset Experiment")
@@ -219,8 +277,12 @@ def run_mnist_experiment():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     print("\n--- Original Data ---")
-    acc_orig, f1_orig, _ = train_and_evaluate(X_train, X_test, y_train, y_test, 'logistic')
-    print(f"Logistic Regression: Accuracy={acc_orig:.4f}, F1={f1_orig:.4f}")
+    acc_orig_lr, f1_orig_lr, _ = train_and_evaluate(X_train, X_test, y_train, y_test, 'logistic')
+    print(f"Logistic Regression: Accuracy={acc_orig_lr:.4f}, F1={f1_orig_lr:.4f}")
+
+    acc_orig_cnn, f1_orig_cnn, _ = train_and_evaluate_cnn(X_train, X_test, y_train, y_test)
+    if acc_orig_cnn is not None:
+        print(f"CNN: Accuracy={acc_orig_cnn:.4f}, F1={f1_orig_cnn:.4f}")
 
     print("\n--- PEAFOWL Processed Data (Vertical Split, 4 parties) ---")
     X_aligned, y_aligned = simulate_peafowl_alignment(X, y, num_parties=4, feature_split=True)
@@ -230,16 +292,27 @@ def run_mnist_experiment():
         X_aligned, y_aligned, test_size=0.2, random_state=42
     )
 
-    acc_peafowl, f1_peafowl, _ = train_and_evaluate(X_train_aligned, X_test_aligned, y_train_aligned, y_test_aligned, 'logistic')
-    print(f"Logistic Regression: Accuracy={acc_peafowl:.4f}, F1={f1_peafowl:.4f}")
+    acc_peafowl_lr, f1_peafowl_lr, _ = train_and_evaluate(X_train_aligned, X_test_aligned, y_train_aligned, y_test_aligned, 'logistic')
+    print(f"Logistic Regression: Accuracy={acc_peafowl_lr:.4f}, F1={f1_peafowl_lr:.4f}")
+
+    acc_peafowl_cnn, f1_peafowl_cnn, _ = train_and_evaluate_cnn(X_train_aligned, X_test_aligned, y_train_aligned, y_test_aligned)
+    if acc_peafowl_cnn is not None:
+        print(f"CNN: Accuracy={acc_peafowl_cnn:.4f}, F1={f1_peafowl_cnn:.4f}")
 
     print("\n--- Comparison ---")
-    print(f"Logistic Regression: Original vs PEAFOWL = {acc_orig:.4f} vs {acc_peafowl:.4f} (diff: {abs(acc_orig - acc_peafowl):.4f})")
+    print(f"Logistic Regression: Original vs PEAFOWL = {acc_orig_lr:.4f} vs {acc_peafowl_lr:.4f} (diff: {abs(acc_orig_lr - acc_peafowl_lr):.4f})")
+    if acc_orig_cnn is not None:
+        print(f"CNN: Original vs PEAFOWL = {acc_orig_cnn:.4f} vs {acc_peafowl_cnn:.4f} (diff: {abs(acc_orig_cnn - acc_peafowl_cnn):.4f})")
 
-    return {
+    result = {
         'dataset': 'mnist',
-        'original_lr_acc': acc_orig, 'peafowl_lr_acc': acc_peafowl,
+        'original_lr_acc': acc_orig_lr, 'peafowl_lr_acc': acc_peafowl_lr,
     }
+    if acc_orig_cnn is not None:
+        result['original_cnn_acc'] = acc_orig_cnn
+        result['peafowl_cnn_acc'] = acc_peafowl_cnn
+
+    return result
 
 
 if __name__ == '__main__':
@@ -261,5 +334,7 @@ if __name__ == '__main__':
     for r in results:
         print(f"\n{r['dataset']}:")
         print(f"  Logistic Regression: Original={r.get('original_lr_acc', 'N/A'):.4f}, PEAFOWL={r.get('peafowl_lr_acc', 'N/A'):.4f}")
+        if 'original_cnn_acc' in r:
+            print(f"  CNN: Original={r['original_cnn_acc']:.4f}, PEAFOWL={r['peafowl_cnn_acc']:.4f}")
         if 'original_rf_acc' in r:
             print(f"  Random Forest: Original={r['original_rf_acc']:.4f}, PEAFOWL={r['peafowl_rf_acc']:.4f}")

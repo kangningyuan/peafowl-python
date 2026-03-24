@@ -89,8 +89,17 @@ chmod +x start.sh
 3. 运行所有单元测试
 4. 测试通过后自动启动 WebApp 服务
 
-#### 运行测试
 
+
+#### 激活环境
+
+```bash
+source .venv/bin/activate
+```
+
+
+
+#### 运行测试
 ```bash
 # 运行所有单元测试
 python -m pytest tests/ -v

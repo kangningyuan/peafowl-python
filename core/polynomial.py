@@ -32,12 +32,11 @@ def lagrange_interpolation(points: List[int], values: List[int], modulus: int) -
         denominator = 1
         for j in range(n):
             if i != j:
-                numerator = (numerator * (0 - points[j])) % modulus
-                denominator = (denominator * (points[i] - points[j])) % modulus
-        if denominator < 0:
-            denominator += modulus
-        inv_denom = pow(denominator, -1, modulus)
-        coeff = (values[i] * numerator * inv_denom) % modulus
+                numerator = (numerator * (points[j])) % modulus
+                denominator = (denominator * ((points[i] - points[j]) % modulus)) % modulus
+        diff = (points[i] * denominator) % modulus
+        inv_diff = pow(diff, -1, modulus)
+        coeff = (values[i] * numerator * inv_diff) % modulus
         result[i] = coeff
 
     return result

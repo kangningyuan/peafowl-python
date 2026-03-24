@@ -18,9 +18,9 @@ class OTExtension:
         for i, (msg_pair, choice) in enumerate(zip(messages, receiver_choice_bits)):
             prf = PRF(t_keys[i])
             if choice == 0:
-                results.append(msg_pair[0] + prf.eval(msg_pair[1]))
+                results.append(msg_pair[0] + prf.eval(msg_pair[1]).to_bytes(16, 'big'))
             else:
-                results.append(msg_pair[1] + prf.eval(msg_pair[0]))
+                results.append(msg_pair[1] + prf.eval(msg_pair[0]).to_bytes(16, 'big'))
 
         return results
 

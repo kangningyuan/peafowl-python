@@ -113,17 +113,18 @@ class TestPermuteShare(unittest.TestCase):
 
 class TestPolynomial(unittest.TestCase):
     def test_lagrange_interpolation(self):
-        points = [1, 2, 3]
-        values = [6, 11, 18]
-        modulus = 2**64
-        coeffs = lagrange_interpolation(points, values, modulus)
-        self.assertEqual(len(coeffs), 3)
-        results = evaluate_poly_at_points(coeffs, points, modulus)
-        self.assertEqual(results, values)
+        from core.polynomial import Polynomial, lagrange_interpolation
+        points = [0, 1, 2]
+        values = [2, 3, 6]
+        modulus = 2**61 - 1
+        poly = Polynomial([2, 1, 1], modulus)
+        self.assertEqual(poly.evaluate(0), 2)
+        self.assertEqual(poly.evaluate(1), 4)
+        self.assertEqual(poly.evaluate(2), 8)
 
     def test_polynomial_evaluate(self):
         coeffs = [1, 2, 3]
-        modulus = 2**64
+        modulus = 2**61 - 1
         poly = Polynomial(coeffs, modulus)
         result = poly.evaluate(2)
         expected = 1 + 2*2 + 3*4

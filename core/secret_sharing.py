@@ -20,4 +20,4 @@ def share_vector(vector: List[int], n: int, modulus: int) -> List[List[int]]:
 def reconstruct_vector(shares: List[List[int]], modulus: int) -> List[int]:
     if not shares:
         return []
-    return [reconstruct([shares[i][j] for i in range(len(shares))], modulus) for j in range(len(shares[0]))]
+    return [reconstruct(shares[k], modulus) for k in range(len(shares))]

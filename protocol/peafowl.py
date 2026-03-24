@@ -31,19 +31,19 @@ class PEAFOWL:
 
     def align_ids_offline(self, server: Server, encrypted_id_sets: Dict[str, bytes]) -> Tuple[Dict[str, List[int]], int]:
         import pickle
+        id_lists = {}
         id_sets = {}
         for party_id, enc_data in encrypted_id_sets.items():
-            id_sets[party_id] = set(pickle.loads(enc_data))
+            id_lists[party_id] = pickle.loads(enc_data)
+            id_sets[party_id] = set(id_lists[party_id])
 
         common_ids = set.intersection(*id_sets.values())
         intersection_size = len(common_ids)
 
         permutations = {}
-        for party_id in id_sets:
-            enc_list = sorted(id_sets[party_id], key=lambda x: (x + secrets.randbelow(2**32)) % (2**64))
-            party_list = list(id_sets[party_id])
-            party_list.sort()
-            permutations[party_id] = [party_list.index(x) for x in id_sets[party_id]]
+        for party_id, enc_list in id_lists.items():
+            common_list = sorted([x for x in enc_list if x in common_ids])
+            permutations[party_id] = [enc_list.index(x) for x in common_list]
 
         return permutations, intersection_size
 
@@ -67,9 +67,9 @@ class PEAFOWL:
         aligned_size = min(len(server_permutation), len(features))
         aligned_features = np.zeros((aligned_size, features.shape[1]), dtype=np.float64)
 
-        for i, pi_idx in enumerate(server_permutation[:aligned_size]):
-            if pi_idx < len(features):
-                aligned_features[i] = features[pi_idx]
+        for i, perm_idx in enumerate(server_permutation[:aligned_size]):
+            if perm_idx < len(features):
+                aligned_features[i] = features[perm_idx]
 
         feature_shares = []
         for i in range(aligned_size):
@@ -102,7 +102,38 @@ class PEAFOWL:
         for dp in data_providers:
             if dp.get_id() in permutations:
                 perm = permutations[dp.get_id()]
-                dp.set_aligned_ids([dp.get_ids()[i] for i in perm[:intersection_size]])
-                aligned_features[dp.get_id()] = dp.get_aligned_features()
+                aligned_ids = [dp.get_ids()[i] for i in perm[:intersection_size]]
+                dp.set_aligned_ids(aligned_ids)
+                
+                perm_array = np.array(perm[:intersection_size])
+                features = dp.get_features()
+                aligned = features[perm_array]
+                aligned_features[dp.get_id()] = aligned
 
         return aligned_features
+
+    def run_vertical_federated_learning(
+        self,
+        data_providers: List[DataProvider],
+        server: Server
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        aligned_features_dict = self.run_protocol(data_providers, server)
+        
+        X_combined = None
+        for party_id in sorted(aligned_features_dict.keys()):
+            if X_combined is None:
+                X_combined = aligned_features_dict[party_id]
+            else:
+                X_combined = np.hstack([X_combined, aligned_features_dict[party_id]])
+        
+        y = None
+        for dp in data_providers:
+            if hasattr(dp, 'labels'):
+                y = dp.labels
+                break
+        if y is None:
+            aligned_ids = data_providers[0].get_aligned_ids()
+            id_to_idx = {uid: idx for idx, uid in enumerate(data_providers[0].get_ids())}
+            y = np.array([0] * len(aligned_ids))
+        
+        return X_combined, y

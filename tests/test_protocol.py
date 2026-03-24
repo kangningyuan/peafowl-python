@@ -12,7 +12,7 @@ class TestPRZS(unittest.TestCase):
     def test_przs_setup(self):
         num_parties = 3
         threshold = 1
-        modulus = 2**64
+        modulus = 2**61 - 1
         przs, keys = PRZS.setup(num_parties, threshold, modulus)
         self.assertIsNotNone(przs)
         self.assertIsNotNone(keys)
@@ -20,7 +20,7 @@ class TestPRZS(unittest.TestCase):
     def test_przs_generate_share(self):
         num_parties = 3
         threshold = 1
-        modulus = 2**64
+        modulus = 2**61 - 1
         przs, keys = PRZS.setup(num_parties, threshold, modulus)
         share = przs.generate_share(0, 1)
         self.assertIsInstance(share, int)
@@ -59,9 +59,9 @@ class TestPEAFOWL(unittest.TestCase):
         import pickle
         common_ids = {1, 2, 3}
         encrypted_ids = {
-            "P0": pickle.dumps({1, 2, 3, 4}),
-            "P1": pickle.dumps({1, 2, 3, 5}),
-            "P2": pickle.dumps({1, 2, 3, 6}),
+            "P0": pickle.dumps([1, 2, 3, 4]),
+            "P1": pickle.dumps([1, 2, 3, 5]),
+            "P2": pickle.dumps([1, 2, 3, 6]),
         }
         permutations, intersection_size = peafowl.align_ids_offline(server, encrypted_ids)
         self.assertEqual(intersection_size, 3)

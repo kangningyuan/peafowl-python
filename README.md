@@ -24,7 +24,7 @@ PEAFOWL 协议的核心思想是通过**置换（Permutation）**和**秘密共�
 ### 项目结构
 
 ```
-peafowl-2/
+peafowl-python/
 ├── core/                      # 基础密码学原语
 │   ├── secret_sharing.py      # 加法秘密共享
 │   ├── prf.py                 # 伪随机函数（基于HMAC-SHA256）
@@ -251,7 +251,7 @@ The core idea of the PEAFOWL protocol is to achieve secure alignment through **p
 ### Project Structure
 
 ```
-peafowl-2/
+peafowl-python/
 ├── core/                      # Core cryptographic primitives
 │   ├── secret_sharing.py      # Additive secret sharing
 │   ├── prf.py                 # Pseudo-random function (based on HMAC-SHA256)

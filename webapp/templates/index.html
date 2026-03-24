@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEAFOWL - 隐私保护实体对齐系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>🔒 PEAFOWL - 隐私保护实体对齐系统</h1>
+        <p>Privacy-Preserving Entity Alignment for Vertical Federated Learning</p>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="showSection('overview')">项目概览</button>
+        <button class="nav-btn" onclick="showSection('demo')">协议演示</button>
+        <button class="nav-btn" onclick="showSection('cryptography')">密码学原理</button>
+        <button class="nav-btn" onclick="showSection('steps')">分步流程</button>
+        <button class="nav-btn" onclick="showSection('mnist-training')">MNIST训练</button>
+    </nav>
+
+    <main>
+        <!-- 项目概览 -->
+        <section id="overview" class="section active">
+            <div class="card">
+                <h2>项目介绍</h2>
+                <p>PEAFOWL是一个为垂直联邦学习设计的隐私保护实体对齐协议框架。它允许不同数据方在不泄露各自数据的情况下，安全地找出共同样本（交集），并基于对齐后的数据联合训练机器学习模型。</p>
+            </div>
+
+            <div class="card">
+                <h2>核心特性</h2>
+                <ul>
+                    <li>🛡️ <strong>隐私保护</strong>：使用加法秘密共享、伪随机函数、密钥同态伪随机生成器等密码学技术</li>
+                    <li>⚡ <strong>高效协议</strong>：通信和计算复杂度为线性级别 O(n)，适合大规模数据集</li>
+                    <li>👥 <strong>多方支持</strong>：支持多个数据参与方的实体对齐</li>
+                    <li>📊 <strong>灵活模型</strong>：支持逻辑回归、CNN、SVM等多种机器学习模型</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>技术原理</h2>
+                <div class="tech-principle">
+                    <div class="tech-item">
+                        <h3>1️⃣ 实体对齐</h3>
+                        <p>各方加密自己的样本ID并发送给服务器，服务器计算交集大小，但不知道具体交集ID</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>2️⃣ 特征组合</h3>
+                        <p>各方基于交集样本，使用PEAFOWL协议组合各自的特征</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>3️⃣ 安全计算</h3>
+                        <p>通过秘密共享和SHPRG混淆特征值，确保服务器无法获取原始数据</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>项目结构</h2>
+                <pre class="code-block">
+peafowl-2/
+├── core/                      # 基础密码学原语
+│   ├── secret_sharing.py      # 加法秘密共享
+│   ├── prf.py                 # 伪随机函数（HMAC-SHA256）
+│   ├── shprg.py               # 密钥同态PRG（LWR）
+│   ├── ot.py                  # 不经意传输扩展
+│   └── polynomial.py          # 多项式运算
+├── protocol/                  # PEAFOWL协议实现
+│   ├── przs.py                # 伪随机零共享
+│   └── peafowl.py             # 主协议
+├── party/                     # 角色实现
+│   ├── data_provider.py       # 数据提供方
+│   └── server.py              # 云服务器
+└── network/                   # 网络模拟
+    └── channel.py             # 通信通道</pre>
+            </div>
+        </section>
+
+        <!-- 协议演示 -->
+        <section id="demo" class="section">
+            <div class="card">
+                <h2>协议演示</h2>
+                <p>配置参与方数量，运行PEAFOWL协议并查看结果</p>
+                
+                <div class="config-panel">
+                    <label for="num-parties">参与方数量：</label>
+                    <input type="number" id="num-parties" value="3" min="2" max="10">
+                    <button onclick="runDemo()" class="btn btn-primary">运行协议</button>
+                </div>
+
+                <div id="demo-result" class="result-panel" style="display: none;">
+                    <h3>运行结果</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>参与方数量</h4>
+                            <span id="stat-parties">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h4>交集大小</h4>
+                            <span id="stat-intersection">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h4>对齐后样本数</h4>
+                            <span id="stat-aligned">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h4>总特征数</h4>
+                            <span id="stat-features">0</span>
+                        </div>
+                    </div>
+
+                    <h3>各参与方情况</h3>
+                    <div id="parties-info" class="parties-list"></div>
+
+                    <h3>对齐后的特征</h3>
+                    <div id="aligned-features" class="features-list"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>实时流程可视化</h2>
+                <div id="flow-visualization" class="flow-visualization">
+                    <div class="flow-step">
+                        <div class="step-icon">👤</div>
+                        <div class="step-label">数据提供方 P0</div>
+                        <div class="step-content" id="flow-p0"></div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">
+                        <div class="step-icon">👤</div>
+                        <div class="step-label">数据提供方 P1</div>
+                        <div class="step-content" id="flow-p1"></div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-step">
+                        <div class="step-icon">👤</div>
+                        <div class="step-label">数据提供方 P2</div>
+                        <div class="step-content" id="flow-p2"></div>
+                    </div>
+                    <div class="flow-arrow">🔄</div>
+                    <div class="flow-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">加密ID</div>
+                        <div class="step-content" id="flow-encrypt"></div>
+                    </div>
+                    <div class="flow-arrow">➡️</div>
+                    <div class="flow-step">
+                        <div class="step-icon">☁️</div>
+                        <div class="step-label">服务器</div>
+                        <div class="step-content" id="flow-server"></div>
+                    </div>
+                    <div class="flow-arrow">intersect</div>
+                    <div class="flow-step">
+                        <div class="step-icon">✅</div>
+                        <div class="step-label">计算交集</div>
+                        <div class="step-content" id="flow-intersect"></div>
+                    </div>
+                    <div class="flow-arrow">⬇️</div>
+                    <div class="flow-step">
+                        <div class="step-icon">📊</div>
+                        <div class="step-label">对齐特征</div>
+                        <div class="step-content" id="flow-align"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 密码学原理 -->
+        <section id="cryptography" class="section">
+            <div class="card">
+                <h2>密码学原语</h2>
+                <p>PEAFOWL使用多种密码学技术来保护数据隐私</p>
+                
+                <div class="crypto-grid">
+                    <div class="crypto-card" onclick="showCryptoDetails('secret_sharing')">
+                        <div class="crypto-icon">🔢</div>
+                        <h3>加法秘密共享</h3>
+                        <p>将秘密拆分为多个份额，只有所有份额相加才能恢复原始数据</p>
+                        <button class="btn btn-sm">查看详情</button>
+                    </div>
+                    
+                    <div class="crypto-card" onclick="showCryptoDetails('prf')">
+                        <div class="crypto-icon">🔐</div>
+                        <h3>伪随机函数 (PRF)</h3>
+                        <p>基于HMAC-SHA256，用于安全地加密样本ID</p>
+                        <button class="btn btn-sm">查看详情</button>
+                    </div>
+                    
+                    <div class="crypto-card" onclick="showCryptoDetails('shprg')">
+                        <div class="crypto-icon">🔄</div>
+                        <h3>密钥同态PRG (SHPRG)</h3>
+                        <p>基于LWR问题，支持密钥同态运算</p>
+                        <button class="btn btn-sm">查看详情</button>
+                    </div>
+                    
+                    <div class="crypto-card" onclick="showCryptoDetails('permute_share')">
+                        <div class="crypto-icon">🔀</div>
+                        <h3>置换共享</h3>
+                        <p>在不泄露数据顺序的情况下进行特征重排</p>
+                        <button class="btn btn-sm">查看详情</button>
+                    </div>
+                </div>
+
+                <div id="crypto-details" class="crypto-details" style="display: none;">
+                    <h3 id="crypto-title">密码学原语详情</h3>
+                    <p id="crypto-description">描述</p>
+                    <div id="crypto-example" class="example-box"></div>
+                    <button onclick="hideCryptoDetails()" class="btn btn-secondary">关闭</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分步流程 -->
+        <section id="steps" class="section">
+            <div class="card">
+                <h2>PEAFOWL协议分步流程</h2>
+                <button onclick="runStepByStep()" class="btn btn-primary">运行完整流程</button>
+                
+                <div id="steps-container" class="steps-container"></div>
+            </div>
+        </section>
+
+        <!-- MNIST训练结果展示 -->
+        <section id="mnist-training" class="section">
+            <div class="card">
+                <h2>MNIST垂直联邦学习训练</h2>
+                <p>使用真实MNIST数据集进行垂直联邦学习训练，展示PEAFOWL在图像识别场景下的应用</p>
+                
+                <div class="config-panel">
+                    <label for="mnist-num-parties">参与方数量：</label>
+                    <input type="number" id="mnist-num-parties" value="3" min="2" max="10">
+                    
+                    <label for="model-type">模型类型：</label>
+                    <select id="model-type">
+                        <option value="cnn">CNN (卷积神经网络)</option>
+                        <option value="logistic">Logistic Regression</option>
+                    </select>
+                    
+                    <button onclick="runMnistTraining()" class="btn btn-primary">运行训练</button>
+                </div>
+                
+                <div id="mnist-training-result" class="training-result" style="display: none;">
+                    <h3>训练结果</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>参与方数量</h4>
+                            <span id="mnist-parties">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h4>对齐后样本数</h4>
+                            <span id="mnist-aligned">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h4>特征维度</h4>
+                            <span id="mnist-features">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h4>模型准确率</h4>
+                            <span id="mnist-accuracy">0%</span>
+                        </div>
+                    </div>
+
+                    <h3>数据集信息</h3>
+                    <div id="mnist-dataset-info" class="info-box"></div>
+
+                    <h3>模型信息</h3>
+                    <div id="mnist-model-performance" class="info-box"></div>
+
+                    <h3>分类结果统计</h3>
+                    <div id="mnist-classification-report" class="info-box"></div>
+
+                    <h3>正确分类的手写数字示例</h3>
+                    <p class="visualization-hint">以下展示模型正确识别的手写数字样本</p>
+                    <div id="correct-visualizations" class="visualization-grid"></div>
+
+                    <h3>错误分类的手写数字示例</h3>
+                    <p class="visualization-hint">以下展示模型识别错误的手写数字样本（红色边框表示错误）</p>
+                    <div id="incorrect-visualizations" class="visualization-grid"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>PEAFOWL - Privacy-Preserving Entity Alignment for Vertical Federated Learning</p>
+        <p>仅供学术研究和教学目的</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

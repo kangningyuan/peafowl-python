@@ -41,6 +41,13 @@ peafowl-2/
 │   └── channel.py             # 通信通道
 ├── utils/                     # 工具函数
 │   └── data_loader.py         # 数据加载
+├── webapp/                    # Web可视化应用
+│   ├── app.py                 # Flask后端服务
+│   ├── templates/             # HTML模板
+│   │   └── index.html         # 主页面
+│   └── static/                # 静态资源
+│       ├── style.css          # 样式文件
+│       └── script.js          # 前端脚本
 ├── tests/                     # 测试文件
 │   ├── test_core.py           # 核心模块测试
 │   ├── test_protocol.py       # 协议测试
@@ -79,6 +86,45 @@ python tests/test_real_vertical_fl.py
 # 运行机器学习对比测试
 python tests/test_ml_comparison.py
 ```
+
+#### Web可视化应用
+
+PEAFOWL 提供了一个交互式 Web 应用，用于可视化展示协议流程和训练结果。
+
+##### 启动服务
+
+```bash
+cd /home/yuank/peafowl-2/webapp
+python app.py
+```
+
+服务启动后，访问 http://localhost:5000 即可使用。
+
+##### 功能模块
+
+| 模块 | 说明 |
+|------|------|
+| **项目概览** | PEAFOWL 项目介绍、核心特性、技术原理 |
+| **协议演示** | 配置参与方数量，运行 PEAFOWL 协议并查看实时流程可视化 |
+| **密码学原理** | 展示加法秘密共享、PRF、SHPRG、置换共享等密码学原语的原理和示例 |
+| **分步流程** | 详细展示 PEAFOWL 协议的 7 个阶段（数据准备、ID加密、交集计算、特征对齐、秘密共享、特征混淆、结果输出） |
+| **MNIST训练** | 使用真实 MNIST 手写数字数据集进行垂直联邦学习训练，支持 CNN 和 Logistic Regression 模型 |
+
+##### MNIST训练功能
+
+- 支持选择参与方数量（2-10个）
+- 支持选择模型类型：CNN（卷积神经网络）或 Logistic Regression
+- 展示数据对齐信息、模型训练结果
+- **可视化展示**：正确分类和错误分类的手写数字样本，显示真实标签、预测标签和置信度
+
+##### API接口
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/generate_data` | POST | 生成 MNIST 垂直联邦学习数据并运行协议 |
+| `/api/step_by_step` | POST | 分步展示协议流程 |
+| `/api/cryptography_details` | POST | 获取密码学原语详情 |
+| `/api/train_mnist` | POST | 运行 MNIST 训练（支持 CNN） |
 
 #### 使用示例
 
@@ -207,6 +253,13 @@ peafowl-2/
 │   └── channel.py             # Communication channel
 ├── utils/                     # Utility functions
 │   └── data_loader.py         # Data loading
+├── webapp/                    # Web visualization application
+│   ├── app.py                 # Flask backend service
+│   ├── templates/             # HTML templates
+│   │   └── index.html         # Main page
+│   └── static/                # Static resources
+│       ├── style.css          # Stylesheet
+│       └── script.js          # Frontend script
 ├── tests/                     # Test files
 │   ├── test_core.py           # Core module tests
 │   ├── test_protocol.py       # Protocol tests
@@ -245,6 +298,45 @@ python tests/test_real_vertical_fl.py
 # Run ML comparison tests
 python tests/test_ml_comparison.py
 ```
+
+#### Web Visualization Application
+
+PEAFOWL provides an interactive web application for visualizing protocol workflows and training results.
+
+##### Starting the Service
+
+```bash
+cd /home/yuank/peafowl-2/webapp
+python app.py
+```
+
+After the service starts, visit http://localhost:5000 to use the application.
+
+##### Feature Modules
+
+| Module | Description |
+|--------|-------------|
+| **Overview** | PEAFOWL project introduction, core features, technical principles |
+| **Protocol Demo** | Configure number of parties, run PEAFOWL protocol with real-time visualization |
+| **Cryptography** | Demonstrate cryptographic primitives including additive secret sharing, PRF, SHPRG, permutation sharing |
+| **Step-by-Step** | Detailed 7-stage protocol walkthrough (Data Preparation, ID Encryption, Intersection Computation, Feature Alignment, Secret Sharing, Feature Obfuscation, Result Output) |
+| **MNIST Training** | Train vertical federated learning models on real MNIST handwritten digit dataset, supports CNN and Logistic Regression |
+
+##### MNIST Training Features
+
+- Configurable number of parties (2-10)
+- Model selection: CNN (Convolutional Neural Network) or Logistic Regression
+- Display data alignment info and model training results
+- **Visualization**: Correctly and incorrectly classified handwritten digit samples with true labels, predicted labels, and confidence scores
+
+##### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/generate_data` | POST | Generate MNIST vertical FL data and run protocol |
+| `/api/step_by_step` | POST | Step-by-step protocol demonstration |
+| `/api/cryptography_details` | POST | Get cryptographic primitive details |
+| `/api/train_mnist` | POST | Run MNIST training (supports CNN) |
 
 #### Usage Example
 
